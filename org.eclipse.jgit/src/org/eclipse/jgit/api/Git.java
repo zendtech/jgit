@@ -664,6 +664,13 @@ public class Git {
 	}
 
 	/**
+	 * @return command
+	 */
+	public RemoteCommand remote() {
+		return new RemoteCommand(repo);
+	}
+
+	/**
 	 * @return the git repository this class is interacting with
 	 */
 	public Repository getRepository() {
