@@ -71,6 +71,12 @@ class Status extends TextBuiltin {
 
 	protected final String statusFileListFormatUnmerged = CLIText.get().statusFileListFormatUnmerged;
 
+	@Option(name = "--porcelain")
+	protected boolean porcelain;
+
+	@Option(name = "--untracked-files", aliases = { "-u" })
+	protected String untrackedFilesMode;
+
 	@Option(name = "--", metaVar = "metaVar_path", multiValued = true)
 	protected List<String> filterPaths;
 
@@ -79,12 +85,15 @@ class Status extends TextBuiltin {
 		// Print current branch name
 		final Ref head = db.getRef(Constants.HEAD);
 		boolean firstHeader = true;
-		if (head != null && head.isSymbolic()) {
-			String branch = Repository.shortenRefName(head.getLeaf().getName());
-			outw.println(CLIText.formatLine(
-					MessageFormat.format(CLIText.get().onBranch, branch)));
-		} else
-			outw.println(CLIText.formatLine(CLIText.get().notOnAnyBranch));
+		if (!porcelain) {
+			if (head != null && head.isSymbolic()) {
+				String branch = Repository.shortenRefName(head.getLeaf()
+						.getName());
+				outw.println(CLIText.formatLine(MessageFormat.format(
+						CLIText.get().onBranch, branch)));
+			} else
+				outw.println(CLIText.formatLine(CLIText.get().notOnAnyBranch));
+		}
 		// List changes
 		StatusCommand statusCommand = new Git(db).status();
 		if (filterPaths != null && filterPaths.size() > 0)
@@ -131,7 +140,9 @@ class Status extends TextBuiltin {
 			firstHeader = false;
 		}
 		int nbUntracked = untracked.size();
-		if (nbUntracked > 0) {
+		if (nbUntracked > 0
+				&& (untrackedFilesMode == null || !"no"
+						.equals(untrackedFilesMode))) {
 			if (!firstHeader)
 				printSectionHeader(""); //$NON-NLS-1$
 			printSectionHeader(CLIText.get().untrackedFiles);
@@ -141,11 +152,13 @@ class Status extends TextBuiltin {
 
 	protected void printSectionHeader(String pattern, Object... arguments)
 			throws IOException {
-		outw.println(CLIText.formatLine(MessageFormat
-				.format(pattern, arguments)));
-		if (!pattern.equals("")) //$NON-NLS-1$
-			outw.println(CLIText.formatLine("")); //$NON-NLS-1$
-		outw.flush();
+		if (!porcelain) {
+			outw.println(CLIText.formatLine(MessageFormat.format(pattern,
+					arguments)));
+			if (!pattern.equals("")) //$NON-NLS-1$
+				outw.println(CLIText.formatLine("")); //$NON-NLS-1$
+			outw.flush();
+		}
 	}
 
 	protected int printList(Collection<String> list) throws IOException {
