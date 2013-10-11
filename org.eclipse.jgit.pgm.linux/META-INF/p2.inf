@@ -1,0 +1,2 @@
+instructions.install = \
+chmod(targetDir:@artifact,git,permissions:755);
