@@ -713,6 +713,13 @@ public class Git implements AutoCloseable {
 	}
 
 	/**
+	 * @return command
+	 */
+	public RemoteCommand remote() {
+		return new RemoteCommand(repo);
+	}
+
+	/**
 	 * @return the git repository this class is interacting with; see {@link
 	 *         #close()} for notes on closing this repository.
 	 */
